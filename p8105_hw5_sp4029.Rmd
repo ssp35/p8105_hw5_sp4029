@@ -160,3 +160,32 @@ file_data %>%
 The control arm subjects tend to have lower observation scores than the experimental arm subjects. There is a clear separation between the two groups by week 8.
 
 ### Problem 3
+
+```{r}
+set.seed(10)
+
+iris_with_missing <- 
+  iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species))
+```
+
+```{r}
+replace_missing <- 
+  function(column) {
+    if (is.numeric(column)) {
+      column <- ifelse(is.na(column), mean(column, na.rm = TRUE), column)
+      return(column)
+    }
+    
+    if (is.character(column)) {
+      column <- ifelse(is.na(column), "virginica", column)
+      return(column)
+    }
+  }
+
+iris_replaced <- 
+  iris_with_missing %>% 
+  map_df(~replace_missing(.x))
+```
+
