@@ -112,4 +112,51 @@ results_df %>%
 
 ### Problem 2
 
+Data import and cleaning
+
+```{r message=FALSE}
+file_names <- 
+  tibble(
+    file = list.files("data/zip_data/")
+  )
+
+read_files <- function(file) {
+  data <- 
+    read_csv(str_c("data/zip_data/", file))
+  
+  return(data)
+}
+
+file_data <- 
+  file_names %>% 
+  mutate(
+    data = map(file, ~read_files(.x))
+  ) %>%
+  unnest(data)
+
+file_data <- 
+  file_data %>% 
+  mutate(arm = substr(file, 1, 3),
+         id = substr(file, 1, 6)) %>% 
+  relocate(file, arm, id) %>% 
+  pivot_longer(week_1:week_8,
+               names_to = "week",
+               names_prefix = "week_",
+               values_to = "obs")
+```
+
+Plot the data.
+
+```{r}
+file_data %>% 
+  ggplot(aes(x = week, y = obs, group = id, color = id)) +
+  geom_line() +
+  labs(title = "Observation of Control and Experimental Groups Over 8 Weeks",
+       x = "Week",
+       y = "Observation") +
+  theme(legend.key.size = unit(0.6, "lines"))
+```
+
+The control arm subjects tend to have lower observation scores than the experimental arm subjects. There is a clear separation between the two groups by week 8.
+
 ### Problem 3
